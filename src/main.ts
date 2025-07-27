@@ -47,7 +47,7 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  const PORT = process.env.PORT || 4500;
+  const PORT = 4500;
   await app.listen(PORT);
 
   // Log server URL
