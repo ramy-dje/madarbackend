@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Executing remote command
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          command_timeout: 10m
+
+          script: |
+            if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+              echo "i'm in dev branch ${{ github.ref }}"
+              cd /var/www/dev-api
+              source /root/.nvm/nvm.sh       
+              nvm use 22.14.0               
+              git pull
+              pnpm install -f
+              pm2 restart dev-api
+            elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+              echo "i'm in main branch ${{ github.ref }}"
+              cd /var/www/api
+              source /root/.nvm/nvm.sh       
+              nvm use 22.14.0               
+              git pull
+              pnpm install -f
+              pm2 restart api
+            else
+              echo "Unsupported branch for deployment"
+              exit 1
+            fi

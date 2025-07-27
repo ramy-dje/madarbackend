@@ -1,0 +1,59 @@
+# Database Patterns
+
+## Mongoose Schemas
+- Use `@Schema` decorator with timestamps
+- Implement proper JSON transformations
+- Use `Types.ObjectId` for references
+- Include proper indexing for performance
+
+## Queries
+- Use `$in` for multiple value filters
+- Implement proper ObjectId conversion
+- Use `populate()` for referenced data
+- Apply sorting consistently (`createdAt: -1`)
+
+## Validation
+- Use `CoreService.isValid_ObjectId()` for ID validation
+- Implement proper error handling for invalid IDs
+- Use try-catch blocks for ObjectId conversion
+
+## Schema Pattern
+```typescript
+@Schema({
+  timestamps: true,
+  toJSON: {
+    transform: (_, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    },
+  },
+})
+export class Entity {
+  @Prop({ required: true, enum: EntityType })
+  type: EntityType;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Category', default: [] })
+  categories: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Users' })
+  author: Types.ObjectId;
+}
+```
+
+## Query Pattern
+```typescript
+const data = await this.model
+  .find(filter)
+  .populate('author', 'profileInfo.fullName profileInfo.email')
+  .populate('categories', 'name slug description type')
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(size)
+  .exec();
+```
+description:
+globs:
+alwaysApply: false
+---

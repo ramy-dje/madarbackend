@@ -1,0 +1,68 @@
+# API Design Patterns
+
+## Pagination
+- Use standardized `PaginatedResponse<T>` interface
+- Implement `PaginationService` for consistent pagination logic
+- Support `page` and `size` parameters with defaults
+- Always include `total`, `totalPages`, `hasNext`, `hasPrev`
+
+## Filtering
+- Use comma-separated values for multiple filters
+- Implement `@Transform` decorators for string-to-array conversion
+- Support search functionality across multilingual content
+- Use ObjectId validation for ID-based filters
+
+## DTOs and Validation
+- Extend `PaginationQueryDto` for query DTOs
+- Use `class-validator` decorators for validation
+- Implement custom transforms for complex data processing
+- Always validate ObjectIds before conversion
+
+## CRUD Operations Pattern
+```typescript
+// Create
+async create(dto: CreateDto, userId?: string): Promise<Entity>
+
+// Read (with pagination)
+async findAll(query: QueryDto): Promise<PaginatedResponse<Entity>>
+
+// Update
+async update(id: string, dto: UpdateDto, userId?: string): Promise<Entity>
+
+// Delete
+async remove(id: string): Promise<void>
+```
+
+## Filtering Implementation
+```typescript
+// Parse comma-separated ObjectIds
+private parseCommaSeparatedObjectIds(ids: string): Types.ObjectId[] {
+  if (!ids || typeof ids !== 'string') return [];
+  
+  try {
+    const validIds = ids
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => id && this.coreService.isValid_ObjectId(id));
+    
+    return validIds.map(id => new Types.ObjectId(id));
+  } catch (error) {
+    return [];
+  }
+}
+```
+
+## DTO Transform Pattern
+```typescript
+@Transform(({ value }) => {
+  if (typeof value === 'string') {
+    return value.split(',').map(item => item.trim()).filter(Boolean);
+  }
+  if (Array.isArray(value)) return value;
+  return value ? [value] : undefined;
+})
+```
+description:
+globs:
+alwaysApply: false
+---

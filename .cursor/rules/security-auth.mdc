@@ -1,0 +1,50 @@
+# Security and Authentication
+
+## Guards
+- Use `@Public()` decorator for public endpoints
+- Implement role-based guards (`RoleGuard`)
+- Use `AuthGuard` for protected routes
+- Extract user from request context
+
+## User Context
+- Derive author/creator IDs from authentication context
+- Never accept user IDs in DTOs for security
+- Use `AuthenticatedUserRequestInterInterface` for typed requests
+
+## Input Validation
+- Always validate user inputs
+- Use proper validation decorators
+- Sanitize data before processing
+- Implement rate limiting where needed
+
+## Authentication Pattern
+```typescript
+@Controller('v1/entity')
+export class EntityController {
+  @Post()
+  create(
+    @Body() createDto: CreateDto,
+    @Req() req: AuthenticatedUserRequestInterInterface,
+  ) {
+    return this.service.create(createDto, req.user?.id);
+  }
+
+  @Get()
+  @Public()
+  findAll(@Query() query: QueryDto) {
+    return this.service.findAll(query);
+  }
+}
+```
+
+## Security Best Practices
+- Never expose sensitive data in responses
+- Use proper password hashing
+- Implement JWT token validation
+- Use secure session management
+- Validate ObjectIds before database operations
+- Implement proper access controls
+description:
+globs:
+alwaysApply: false
+---

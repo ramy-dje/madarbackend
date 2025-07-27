@@ -1,0 +1,52 @@
+# CRM Module Patterns
+
+## Module Structure
+- Use feature modules for complex CRM functionality
+- Each sub-module should be self-contained
+- Follow the pattern: `contacts`, `companies`, `categories`, `industries`, `occupations`
+
+## Service Pattern for CRM
+```typescript
+@Injectable()
+export class CrmEntityService {
+  constructor(
+    @InjectModel(Entity.name) private entityModel: Model<EntityDocument>,
+    @Inject(CoreService) private readonly coreService: CoreService,
+    private readonly paginationService: PaginationService,
+  ) {}
+
+  async get_all_entities_with_pagination(query: EntityQueryDto): Promise<PaginatedResponse<Entity>> {
+    const { page, size, skip } = this.paginationService.getPaginationParams(query);
+    
+    const filter: any = { status: { $ne: Status.TRASH } };
+    
+    // Apply filters...
+    
+    const total = await this.entityModel.countDocuments(filter);
+    const data = await this.entityModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(size)
+      .exec();
+
+    return this.paginationService.createPaginatedResponse(data, total, page, size);
+  }
+}
+```
+
+## Controller Pattern for CRM
+```typescript
+@Controller('v1/crm/entities')
+export class CrmEntityController {
+  @Get()
+  @Public()
+  get_all_entities_with_pagination(@Query() query: EntityQueryDto): Promise<PaginatedResponse<Entity>> {
+    return this.service.get_all_entities_with_pagination(query);
+  }
+}
+```
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,65 @@
+# Error Handling
+
+## Exception Types
+- Use NestJS built-in exceptions (`NotFoundException`, `BadRequestException`)
+- Implement custom exception filters when needed
+- Always provide meaningful error messages
+- Use `throwIf` and `throwIfNotFound` helpers
+
+## Error Handling Pattern
+```typescript
+async findOne(id: string): Promise<Entity> {
+  try {
+    throwIf(
+      !this.coreService.isValid_ObjectId(id),
+      'Invalid entity ID format',
+    );
+
+    const entity = await this.model
+      .findOne({ _id: id, status: { $ne: Status.TRASH } })
+      .populate('author', 'profileInfo.fullName profileInfo.email')
+      .exec();
+    
+    throwIfNotFound(entity, `Entity with ID ${id} not found`);
+    return entity;
+  } catch (error) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof BadRequestException
+    ) {
+      throw error;
+    }
+    throw new InternalServerErrorException('Failed to fetch entity');
+  }
+}
+```
+
+## Validation Error Handling
+```typescript
+// Parse comma-separated ObjectIds with error handling
+private parseCommaSeparatedObjectIds(ids: string): Types.ObjectId[] {
+  if (!ids || typeof ids !== 'string') return [];
+  
+  try {
+    const validIds = ids
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => id && this.coreService.isValid_ObjectId(id));
+    
+    return validIds.map(id => new Types.ObjectId(id));
+  } catch (error) {
+    return [];
+  }
+}
+```
+
+## Best Practices
+- Always wrap database operations in try-catch
+- Provide specific error messages
+- Use appropriate HTTP status codes
+- Log errors for debugging
+- Don't expose internal errors to clients
+description:
+globs:
+alwaysApply: false
+---

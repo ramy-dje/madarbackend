@@ -1,0 +1,54 @@
+# NestJS Architecture Rules
+
+## Module Structure
+- Follow NestJS module pattern: `ModuleNameModule`, `ModuleNameController`, `ModuleNameService`
+- Each module should be self-contained with its own DTOs, schemas, and validations
+- Use feature modules for complex functionality (e.g., CRM with sub-modules)
+
+## File Organization
+```
+src/app/modules/[module-name]/
+├── [module-name].module.ts
+├── [module-name].controller.ts
+├── [module-name].service.ts
+├── dto/
+│   ├── create-[entity].dto.ts
+│   ├── update-[entity].dto.ts
+│   └── [entity]-query.dto.ts
+├── schemas/
+│   └── [entity].schema.ts
+├── interfaces/
+│   └── [entity].interface.ts
+├── validations/
+│   └── [entity].validation.ts
+└── services/
+    └── [entity]-validation.service.ts
+```
+
+## Naming Conventions
+- **Files**: kebab-case (`post-query.dto.ts`)
+- **Classes**: PascalCase (`PostQueryDto`)
+- **Methods**: camelCase (`findAll`, `createPost`)
+- **Constants**: UPPER_SNAKE_CASE (`PUBLISHED`, `POST`)
+- **Interfaces**: PascalCase with descriptive names (`PaginatedResponse<T>`)
+- **Enums**: PascalCase (`PostType`, `Status`)
+
+## Import Organization
+```typescript
+// 1. External libraries
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+
+// 2. Internal modules (absolute paths)
+import { CoreService } from 'src/core/services/core.service';
+import { PaginationService } from 'src/core/services/pagination.service';
+
+// 3. Relative imports
+import { CreatePostDto } from './dto/create-post.dto';
+import { Post } from './schemas/post.schema';
+```
+description:
+globs:
+alwaysApply: false
+---
