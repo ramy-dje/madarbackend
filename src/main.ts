@@ -48,7 +48,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   const PORT = 4500;
-  await app.listen(PORT);
+  await app.listen(3000);
 
   // Log server URL
   logger.verbose(`Server is running on: ${await app.getUrl()}/api`);
